@@ -36,12 +36,15 @@ app.post('/create-user', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  if (username !== users.username) {
-    res.status(401).json({ error: 'Fel användarnamn' });
+  const user = users.find((u) => u.username === username);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Fel användarnamn' });
   }
 
-  if (password !== users.password) {
-    res.status(401).json({ error: 'Fel password' });
+  const isPwMatch = await bcrypt.compare(password, user.password);
+  if (!isPwMatch) {
+    return res.status(401).json({ error: 'Fel lösenord' });
   }
 
   const token = jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET, {
