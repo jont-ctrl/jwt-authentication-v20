@@ -54,6 +54,10 @@ app.post('/login', async (req, res) => {
   res.json({ token });
 });
 
+app.get('/public', (req, res) => {
+  res.json({ message: 'Hej denna nås av alla wow' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
