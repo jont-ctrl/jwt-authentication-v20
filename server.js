@@ -10,23 +10,37 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-const user = { id: 123, username: 'test', password: '123' };
-
-const pwTest = await bcrypt.hash('testas', 10);
-console.log(pwTest);
+const users = [];
 
 app.get('/', (req, res) => {
   res.send('Hello, Express');
 });
 
+app.get('/users', (req, res) => {
+  res.status(200).json({ users });
+});
+
+app.post('/create-user', async (req, res) => {
+  const { username, password } = req.body;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  users.push({
+    username: username,
+    password: hashedPassword,
+  });
+
+  res.status(201).json({ message: `Användare regristrerad. ${username}` });
+});
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  if (username !== user.username) {
+  if (username !== users.username) {
     res.status(401).json({ error: 'Fel användarnamn' });
   }
 
-  if (password !== user.password) {
+  if (password !== users.password) {
     res.status(401).json({ error: 'Fel password' });
   }
 
