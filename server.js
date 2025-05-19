@@ -2,12 +2,12 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import verifyJWT from './middleware/verifyJWT.js';
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
 const users = [];
@@ -47,15 +47,19 @@ app.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Fel lösenord' });
   }
 
-  const token = jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET, {
+  const token = jwt.sign({ username }, process.env.JWT_SECRET, {
     expiresIn: '1h',
   });
 
   res.json({ token });
 });
 
-app.get('/public', (req, res) => {
-  res.json({ message: 'Hej denna nås av alla wow' });
+app.get('/public', verifyJWT, (req, res) => {
+  res.json({ message: 'Denna nås av alla' });
+});
+
+app.get('/private', verifyJWT, (req, res) => {
+  res.json({ message: `Denna av bara rätt användare. ${req.userusername}` });
 });
 
 app.listen(PORT, () => {
